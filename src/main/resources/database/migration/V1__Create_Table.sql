@@ -65,8 +65,7 @@ CREATE TABLE reactions (
                         object_id BINARY(36) NOT NULL,
                         type INT NOT NULL,
                         created_by BINARY(36) NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (created_by) REFERENCES users(id));
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
 
 
 DROP TABLE IF EXISTS `follows`;
