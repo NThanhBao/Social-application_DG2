@@ -14,8 +14,8 @@ CREATE TABLE users (
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
 
 
-DROP TABLE IF EXISTS `post`;
-CREATE TABLE post (
+DROP TABLE IF EXISTS `posts`;
+CREATE TABLE posts (
                     id CHAR(36) PRIMARY KEY,
                     title VARCHAR(50) NOT NULL,
                     body TEXT NOT NULL ,
@@ -33,7 +33,7 @@ CREATE TABLE medias (
                     base_name VARCHAR(50) NOT NULL,
                     public_url VARCHAR(50) NOT NULL,
                     post_id CHAR(36),
-                    FOREIGN KEY (post_id) REFERENCES post(id));
+                    FOREIGN KEY (post_id) REFERENCES posts(id));
 
 
 DROP TABLE IF EXISTS favorites;
@@ -42,12 +42,12 @@ CREATE TABLE favorites (
                            user_id CHAR(36),
                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                            PRIMARY KEY (post_id),
-                           FOREIGN KEY (post_id) REFERENCES post(id),
+                           FOREIGN KEY (post_id) REFERENCES posts(id),
                            FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-DROP TABLE IF EXISTS `comment`;
-CREATE TABLE comment (
+DROP TABLE IF EXISTS `comments`;
+CREATE TABLE comments (
                          id CHAR(36) PRIMARY KEY,
                          content VARCHAR(50) NOT NULL,
                          post_id CHAR(36),
@@ -55,7 +55,7 @@ CREATE TABLE comment (
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                          created_by CHAR(36),
                          FOREIGN KEY (created_by) REFERENCES users(id),
-                         FOREIGN KEY (post_id) REFERENCES post(id));
+                         FOREIGN KEY (post_id) REFERENCES posts(id));
 
 
 DROP TABLE IF EXISTS `reactions`;
