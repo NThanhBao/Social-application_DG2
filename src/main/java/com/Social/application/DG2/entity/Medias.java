@@ -10,7 +10,7 @@ import java.util.UUID;
 @Table(name = "medias")
 public class Medias {
     @Id
-    @Column(name = "id", columnDefinition = "VARCHAR(255)")
+    @Column(name = "id", columnDefinition = "CHAR(36)")
     private UUID mediasId;
 
     @Column(name = "base_name")

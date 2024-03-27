@@ -11,10 +11,10 @@ import java.util.*;
 @Table(name = "users")
 public class Users {
     @Id
-    @Column(name = "id", columnDefinition = "VARCHAR(255)")
+    @Column(name = "id", columnDefinition = "CHAR(36)")
     private UUID usersId;
 
-    @Column(name = "user_name")
+    @Column(name = "username")
     private String userName;
 
     private String password;
