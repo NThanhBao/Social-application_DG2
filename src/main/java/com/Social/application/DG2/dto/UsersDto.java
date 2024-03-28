@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class UsersDto {
     private String username;
     private String password;
