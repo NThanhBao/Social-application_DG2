@@ -20,6 +20,6 @@ public class Medias {
     private String publicUrl;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", unique = true)
     private Posts postsId;
 }

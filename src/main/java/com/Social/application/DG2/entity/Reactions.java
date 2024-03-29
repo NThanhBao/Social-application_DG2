@@ -27,6 +27,6 @@ public class Reactions {
     private int type;
 
     @ManyToOne
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", unique = true)
     private Users usersId;
 }

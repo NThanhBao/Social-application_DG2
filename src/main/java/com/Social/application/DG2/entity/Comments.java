@@ -19,7 +19,7 @@ public class Comments {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", unique = true)
     private Posts postId;
 
     @Column(name = "total_like")
@@ -29,7 +29,7 @@ public class Comments {
     private Timestamp createAt;
 
     @ManyToOne
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", unique = true)
     private Users createBy;
 }
 

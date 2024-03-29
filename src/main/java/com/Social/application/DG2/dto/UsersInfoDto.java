@@ -6,14 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsersDto {
+public class UsersInfoDto {
     private String username;
-    private String password;
     private String firstName;
     private String lastName;
     private String role;
@@ -22,8 +22,4 @@ public class UsersDto {
     private Timestamp dateOfBirth;
     private String mail;
     private String avatar;
-    private boolean enable;
-    private Timestamp createAt;
-    private Timestamp updateAt;
-
 }
