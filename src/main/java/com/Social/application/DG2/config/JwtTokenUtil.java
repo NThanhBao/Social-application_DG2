@@ -2,6 +2,7 @@ package com.Social.application.DG2.config;
 
 import com.Social.application.DG2.entity.Users;
 import com.Social.application.DG2.repository.UsersRepository;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -16,13 +17,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
 @Component
 public class JwtTokenUtil {
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.expiration}")
     private Long expiration;
-
     @Autowired
     private UsersRepository usersRepository;
 
@@ -55,12 +56,10 @@ public class JwtTokenUtil {
         final String username = extractUsername(token);
         return !isTokenExpired(token);
     }
-
     private boolean isTokenExpired(String token) {
         return extractExpiration(token)
                 .before(new Date());
     }
-
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -73,7 +72,6 @@ public class JwtTokenUtil {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver
