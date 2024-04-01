@@ -14,6 +14,7 @@ public class Posts {
     @Column(name = "id", columnDefinition = "VARCHAR(255)")
     private UUID postsId;
 
+
     private String title;
 
     private String body;

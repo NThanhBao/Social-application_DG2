@@ -11,12 +11,15 @@ import java.util.*;
 @Table(name = "users")
 public class Users {
     @Id
-    @Column(name = "id", columnDefinition = "VARCHAR(255)")
-    private UUID usersId;
+    private String id;
+    public Users() {
+        this.id = UUID.randomUUID().toString();
+    }
 
-    @Column(name = "user_name")
-    private String userName;
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
 
+    @Column(name = "password")
     private String password;
 
     @Column(name = "first_name")
@@ -25,27 +28,36 @@ public class Users {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "role")
     private String role;
 
+    @Column(name = "gender")
     private boolean gender;
 
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "date_of_birth")
+    @Column(name = "date_of_birth" )
     private Timestamp dateOfBirth;
 
+    @Column(name = "mail")
     private String mail;
 
     private String avatar;
 
+    @Column(name = "enable")
     private boolean enable;
 
     @Column(name = "created_at")
     private Timestamp createAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at" )
     private Timestamp updateAt;
+
+    // Getters and setters
+
+    // Constructor hoặc setter
+
 
 //    @ManyToMany(cascade = CascadeType.ALL)
 //    @JoinTable(
@@ -65,4 +77,14 @@ public class Users {
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Map<Users, Timestamp> followingUser = new HashMap<>();
+
+    @PrePersist
+    protected void onCreate() {
+        createAt = new Timestamp(new Date().getTime());
+    }
+
+//    @PreUpdate
+//    protected void onUpdate() {
+//        updateAt = new Timestamp(new Date().getTime());
+//    }
 }
