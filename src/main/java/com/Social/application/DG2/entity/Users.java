@@ -1,5 +1,7 @@
 package com.Social.application.DG2.entity;
 
+import com.Social.application.DG2.entity.Enum.EnableType;
+import com.Social.application.DG2.entity.Enum.RoleType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,12 +14,10 @@ import java.util.*;
 public class Users {
     @Id
     private String id;
-    public Users() {
-        this.id = UUID.randomUUID().toString();
-    }
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
+
 
     @Column(name = "password")
     private String password;
@@ -27,9 +27,6 @@ public class Users {
 
     @Column(name = "last_name")
     private String lastName;
-
-    @Column(name = "role")
-    private String role;
 
     @Column(name = "gender")
     private boolean gender;
@@ -45,8 +42,18 @@ public class Users {
 
     private String avatar;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private RoleType roleType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "enable")
-    private boolean enable;
+    private EnableType enableType;
+    public Users() {
+        this.id = UUID.randomUUID().toString();
+        this.enableType = EnableType.TRUE;
+        this.roleType = RoleType.USER;
+    }
 
     @Column(name = "created_at")
     private Timestamp createAt;
@@ -54,11 +61,8 @@ public class Users {
     @Column(name = "updated_at" )
     private Timestamp updateAt;
 
-    // Getters and setters
-
-    // Constructor hoặc setter
-
-
+//     Getters and setters
+//     Constructor hoặc setter
 //    @ManyToMany(cascade = CascadeType.ALL)
 //    @JoinTable(
 //            name = "follows",
@@ -83,8 +87,5 @@ public class Users {
         createAt = new Timestamp(new Date().getTime());
     }
 
-//    @PreUpdate
-//    protected void onUpdate() {
-//        updateAt = new Timestamp(new Date().getTime());
-//    }
+
 }
