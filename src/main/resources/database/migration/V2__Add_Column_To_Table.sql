@@ -1,0 +1,4 @@
+ALTER TABLE users
+    ADD COLUMN avatar VARCHAR(255);
+ALTER TABLE users
+    MODIFY password VARCHAR(255);
