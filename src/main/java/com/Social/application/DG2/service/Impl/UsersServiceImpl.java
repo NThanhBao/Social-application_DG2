@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +37,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public ResponseEntity<String> addUser(UsersDto registerDTO) {
-        if (registerRepository.existsByUsername(registerDTO.getUserName())) {
+        if (registerRepository.existsByUsername(registerDTO.getUsername())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username đã đợc sử dụng.");
         }
         if (registerRepository.existsByMail(registerDTO.getMail())) {
@@ -49,7 +48,7 @@ public class UsersServiceImpl implements UsersService {
         }
         Users user = new Users();
 
-        user.setUsername(registerDTO.getUserName());
+        user.setUsername(registerDTO.getUsername());
         user.setPassword(encoder.encode(registerDTO.getPassword()));
         user.setFirstName(registerDTO.getFirstName());
         user.setLastName(registerDTO.getLastName());

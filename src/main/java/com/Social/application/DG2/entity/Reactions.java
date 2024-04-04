@@ -15,18 +15,18 @@ import java.util.UUID;
 public class Reactions {
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
+
     private UUID reactionsId;
 
     @Column(name = "object_type")
     private String objectType;
 
     @Column(name = "object_id", columnDefinition = "CHAR(36)")
-
     private UUID objectId;
 
     private int type;
 
     @ManyToOne
-    @JoinColumn(name = "created_by", unique = true)
+    @JoinColumn(name = "created_by")
     private Users usersId;
 }

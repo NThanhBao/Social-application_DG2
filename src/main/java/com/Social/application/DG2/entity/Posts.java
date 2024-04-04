@@ -28,7 +28,7 @@ public class Posts {
     private int totalComment;
 
     @ManyToOne
-    @JoinColumn(name = "created_by", unique = true)
+    @JoinColumn(name = "created_by")
     private Users usersId;
 
     @Column(name = "created_at")

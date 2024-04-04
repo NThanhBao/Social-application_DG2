@@ -7,6 +7,7 @@ import com.Social.application.DG2.util.annotation.CheckLogin;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+@Controller
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/auth")

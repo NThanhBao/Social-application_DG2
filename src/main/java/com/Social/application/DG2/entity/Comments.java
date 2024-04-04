@@ -19,7 +19,7 @@ public class Comments {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", unique = true)
+    @JoinColumn(name = "post_id")
     private Posts postId;
 
     @Column(name = "total_like")
