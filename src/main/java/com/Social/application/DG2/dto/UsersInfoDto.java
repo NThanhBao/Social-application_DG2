@@ -1,6 +1,5 @@
 package com.Social.application.DG2.dto;
 
-
 import lombok.*;
 
 import java.sql.Timestamp;
@@ -10,18 +9,15 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UsersDto {
+public class UsersInfoDto {
     private String username;
-    private String password;
-    private String mail;
-    private String phoneNumber;
     private String firstName;
     private String lastName;
+    private String role;
     private boolean gender;
+    private String phoneNumber;
     private Timestamp dateOfBirth;
+    private String mail;
     private String avatar;
-    private boolean enable;
-    private Timestamp createAt;
-    private Timestamp updateAt;
 
 }

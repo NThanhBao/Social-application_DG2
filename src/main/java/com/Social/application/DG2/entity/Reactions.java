@@ -14,14 +14,14 @@ import java.util.UUID;
 @Table(name = "reactions")
 public class Reactions {
     @Id
-    @Column(name = "id", columnDefinition = "VARCHAR(255)")
+    @Column(name = "id", columnDefinition = "CHAR(36)")
+
     private UUID reactionsId;
 
     @Column(name = "object_type")
     private String objectType;
 
-    @Column(name = "object_id", columnDefinition = "VARCHAR(255)")
-
+    @Column(name = "object_id", columnDefinition = "CHAR(36)")
     private UUID objectId;
 
     private int type;

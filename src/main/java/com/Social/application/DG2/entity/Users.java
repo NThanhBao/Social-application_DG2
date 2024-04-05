@@ -3,6 +3,7 @@ package com.Social.application.DG2.entity;
 import com.Social.application.DG2.entity.Enum.EnableType;
 import com.Social.application.DG2.entity.Enum.RoleType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -13,11 +14,12 @@ import java.util.*;
 @Table(name = "users")
 public class Users {
     @Id
+    @Column(length = 36)
+    @NotNull
     private String id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
-
 
     @Column(name = "password")
     private String password;
@@ -34,7 +36,8 @@ public class Users {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "date_of_birth" )
+    @Column(name = "date_of_birth")
+
     private Timestamp dateOfBirth;
 
     @Column(name = "mail")
@@ -49,6 +52,7 @@ public class Users {
     @Enumerated(EnumType.STRING)
     @Column(name = "enable")
     private EnableType enableType;
+
     public Users() {
         this.id = UUID.randomUUID().toString();
         this.enableType = EnableType.TRUE;
@@ -58,29 +62,28 @@ public class Users {
     @Column(name = "created_at")
     private Timestamp createAt;
 
-    @Column(name = "updated_at" )
+    @Column(name = "updated_at")
     private Timestamp updateAt;
 
-//     Getters and setters
-//     Constructor hoặc setter
-//    @ManyToMany(cascade = CascadeType.ALL)
-//    @JoinTable(
-//            name = "follows",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "following_user_id")
-//    )
-//    private Set<Users> followingUser = new HashSet<>();
-
-
-    @ElementCollection
-    @CollectionTable(name = "follows",
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "follows",
             joinColumns = @JoinColumn(name = "user_id"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "following_user_id"})
+            inverseJoinColumns = @JoinColumn(name = "following_user_id")
     )
-    @MapKeyJoinColumn(name = "following_user_id")
     @Column(name = "created_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Map<Users, Timestamp> followingUser = new HashMap<>();
+    private Set<Users> followingUser = new HashSet<>();
+
+
+//    @ElementCollection
+//    @CollectionTable(name = "follows",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "following_user_id"})
+//    )
+//    @MapKeyJoinColumn(name = "following_user_id")
+//    @Column(name = "created_at")
+//    @Temporal(TemporalType.TIMESTAMP)
+//    private Map<Users, Timestamp> followingUser = new HashMap<>();
 
     @PrePersist
     protected void onCreate() {
@@ -88,4 +91,10 @@ public class Users {
     }
 
 
+//    @PreUpdate
+//    protected void onUpdate() {
+//        updateAt = new Timestamp(new Date().getTime());
+//    }
+
 }
+

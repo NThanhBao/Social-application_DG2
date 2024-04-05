@@ -3,3 +3,4 @@ ALTER TABLE post
 
 ALTER TABLE comment
     RENAME TO comments;
+

@@ -11,7 +11,7 @@ import java.util.UUID;
 @Table(name = "posts")
 public class Posts {
     @Id
-    @Column(name = "id", columnDefinition = "VARCHAR(255)")
+    @Column(name = "id", columnDefinition = "CHAR(36)")
     private UUID postsId;
 
 
