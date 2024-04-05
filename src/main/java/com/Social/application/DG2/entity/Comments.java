@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Comments {
 
     @Id
-    @Column(name = "id", columnDefinition = "VARCHAR(255)")
+    @Column(name = "id", columnDefinition = "CHAR(36)")
     private UUID commentsId;
 
     private String content;
