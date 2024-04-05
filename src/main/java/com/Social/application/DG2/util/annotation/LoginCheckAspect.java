@@ -9,15 +9,11 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -31,32 +27,33 @@ public class LoginCheckAspect {
     private UsersService customUserDetailsService;
 
     @Before("@annotation(CheckLogin)")
-    public ResponseEntity<?> checkLogin(JoinPoint joinPoint) {
+    public ResponseEntity<?> checkLogin( JoinPoint joinPoint) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, "Không tìm thấy token hoặc token không tồn tại.");
+            throw new UnauthorizedException("Token not found or token does not exist.");
         }
 
         String token = authHeader.substring(7);
-        String username = jwtTokenUtil.extractUsername(token);
+        String username = null;
+        try {
+            username = jwtTokenUtil.extractUsername(token);
+            if (username == null) {
+                throw new UnauthorizedException("Unable to extract username from token.");
+            }
+        } catch (Exception e) {
+            throw new UnauthorizedException(" "+ e.getMessage());
+        }
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
         try {
             if (!jwtTokenUtil.validateToken(token, userDetails)) {
-                throw new UnauthorizedException("Xác thực không thành công");
+                throw new UnauthorizedException("Authentication failed");
             }
-        } catch (UnauthorizedException e) {
-            throw e;
-        } catch (ExpiredJwtException e) {
-            throw new UnauthorizedException("Token đã hết hạn");
-        } catch (MalformedJwtException e) {
-            throw new UnauthorizedException("Token không hợp lệ");
         } catch (Exception e) {
-            throw new UnauthorizedException("Xác thực không thành công: " + e.getMessage());
+            throw new UnauthorizedException("Authentication failed: " + e.getMessage());
         }
         return ResponseEntity.ok().build();
     }
-
 }
 
 

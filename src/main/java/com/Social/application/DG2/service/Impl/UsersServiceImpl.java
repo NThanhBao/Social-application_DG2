@@ -1,6 +1,5 @@
 package com.Social.application.DG2.service.Impl;
 
-import com.Social.application.DG2.config.JwtTokenUtil;
 import com.Social.application.DG2.dto.UsersDto;
 import com.Social.application.DG2.entity.Users;
 import com.Social.application.DG2.service.UsersService;
@@ -23,8 +22,6 @@ public class UsersServiceImpl implements UsersService {
     private PasswordEncoder encoder;
     @Autowired
     private UsersRepository userRepository;
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
 
     @Override
     public UserDetails loadUserByUsername(String username) {
