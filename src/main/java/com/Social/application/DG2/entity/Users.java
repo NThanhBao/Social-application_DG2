@@ -65,36 +65,13 @@ public class Users {
     @Column(name = "updated_at")
     private Timestamp updateAt;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "follows",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "following_user_id")
     )
-    @Column(name = "created_at")
-    private Set<Users> followingUser = new HashSet<>();
-
-
-//    @ElementCollection
-//    @CollectionTable(name = "follows",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "following_user_id"})
-//    )
-//    @MapKeyJoinColumn(name = "following_user_id")
-//    @Column(name = "created_at")
-//    @Temporal(TemporalType.TIMESTAMP)
-//    private Map<Users, Timestamp> followingUser = new HashMap<>();
-
-    @PrePersist
-    protected void onCreate() {
-        createAt = new Timestamp(new Date().getTime());
-    }
-
-
-//    @PreUpdate
-//    protected void onUpdate() {
-//        updateAt = new Timestamp(new Date().getTime());
-//    }
+    private List<Users> followingUser;
 
 }
 

@@ -41,8 +41,6 @@ public class UsersController {
     private ModelMapper modelMapper;
     @Autowired
     private UsersServiceImpl registerService;
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username,
