@@ -43,6 +43,9 @@ public class Users {
     @Column(name = "mail")
     private String mail;
 
+    @Column
+    private String address;
+
     private String avatar;
 
     @Enumerated(EnumType.STRING)
