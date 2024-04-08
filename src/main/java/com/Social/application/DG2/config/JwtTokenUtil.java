@@ -54,28 +54,20 @@ public class JwtTokenUtil{
         byte[] keyBytes= Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public Boolean validateToken(String token) {
+//        final String username = extractUsername(token);
+        return !isTokenExpired(token) && !isTokenValid(token);
     }
 //    check user with token valid but not used
-//    private boolean isTokenValid(String token) {
-//        final String username = extractUsername(token);
-//        Users user = usersRepository.findByUsername(username);
-//        if (user != null) {
-//            final String expectedUsername = user.getUsername();
-//            return username.equals(expectedUsername);
-//        } else {
-//            return false;
-//        }
-//    }
-    public Claims extractAllClaims(String token) {
-        return Jwts
-                .parser()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+public boolean isTokenValid(String token) {
+        final String username = extractUsername(token);
+        Users user = usersRepository.findByUsername(username);
+        if (user != null) {
+            final String expectedUsername = user.getUsername();
+            return username.equals(expectedUsername);
+        } else {
+            return false;
+        }
     }
     private Boolean isTokenExpired(String token)
     {
@@ -85,6 +77,14 @@ public class JwtTokenUtil{
         }
         Date currentDate = new Date();
         return expirationDate.before(currentDate);
+    }
+    public Claims extractAllClaims(String token) {
+        return Jwts
+                .parser()
+                .setSigningKey(getSignKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
     public Date extractExpiration(String token) {
         Claims claims = extractAllClaims(token);
