@@ -20,8 +20,9 @@ public class UsersDto {
     private boolean gender;
     private Timestamp dateOfBirth;
     private String avatar;
-    private boolean enable;
-    private Timestamp createAt;
-    private Timestamp updateAt;
+//    private boolean enable;
+//    private Timestamp createAt;
+//    private Timestamp updateAt;
+    private String address;
 
 }

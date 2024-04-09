@@ -3,6 +3,7 @@ package com.Social.application.DG2.config;
 import com.Social.application.DG2.entity.Users;
 import com.Social.application.DG2.repositories.UsersRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -18,14 +19,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-
 @Component
-public class JwtTokenUtil{
+public class JwtTokenUtil {
 
     @Value("${jwt.secret}")
     private String SECRET_KEY;
-    @Value("${jwt.expiration}")
-    private Long expiration;
 
     @Autowired
     private UsersRepository usersRepository;
@@ -51,24 +49,14 @@ public class JwtTokenUtil{
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
     private Key getSignKey() {
-        byte[] keyBytes= Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return (username.equals(userDetails.getUsername()));
     }
-//    check user with token valid but not used
-//    private boolean isTokenValid(String token) {
-//        final String username = extractUsername(token);
-//        Users user = usersRepository.findByUsername(username);
-//        if (user != null) {
-//            final String expectedUsername = user.getUsername();
-//            return username.equals(expectedUsername);
-//        } else {
-//            return false;
-//        }
-//    }
+
     public Claims extractAllClaims(String token) {
         return Jwts
                 .parser()
@@ -76,15 +64,6 @@ public class JwtTokenUtil{
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-    private Boolean isTokenExpired(String token)
-    {
-        Date expirationDate = extractExpiration(token);
-        if (expirationDate == null) {
-            return true;
-        }
-        Date currentDate = new Date();
-        return expirationDate.before(currentDate);
     }
     public Date extractExpiration(String token) {
         Claims claims = extractAllClaims(token);
@@ -102,5 +81,45 @@ public class JwtTokenUtil{
     {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
+    }
+
+    //Kiểm tra hạn của token
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+
+            Date expirationDate = claims.getExpiration();
+
+            return expirationDate != null && expirationDate.before(new Date());
+        } catch (ExpiredJwtException ex) {
+            return true;
+        }
+    }
+    // Kiểm tra tính hợp lệ của token
+    public boolean isTokenValid(String token) {
+        try {
+            String userId = extractUserId(token);
+            Users user = usersRepository.findById(userId).orElse(null);
+            return user != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    //Kiêm tra đinhhj dạng
+    public Boolean isTokenFormatValid(String token) {
+        // Độ dài tối thiểu và tối đa của token
+        final int MIN_TOKEN_LENGTH = 10;
+        final int MAX_TOKEN_LENGTH = 1000;
+
+        int tokenLength = token.length();
+        if (tokenLength < MIN_TOKEN_LENGTH || tokenLength > MAX_TOKEN_LENGTH) {
+            return false;
+        }
+        if (!token.matches("[a-zA-Z0-9._-]+")) {
+            return false;
+        }
+        String[] parts = token.split("\\.");
+        return parts.length == 3;
     }
 }

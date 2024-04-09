@@ -2,6 +2,7 @@ package com.Social.application.DG2.controller;
 
 import com.Social.application.DG2.dto.SearchUserDto;
 import com.Social.application.DG2.service.SearchUsersService;
+import com.Social.application.DG2.util.annotation.CheckLogin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,11 +22,12 @@ public class SearchUsersController {
     @Autowired
     private SearchUsersService searchUsersService;
 
+    @CheckLogin
     @GetMapping("/search")
     public List<SearchUserDto> searchUsersByFullName(@RequestParam String fullName,
                                                      @RequestParam(defaultValue = "0") int page,
                                                      @RequestParam(defaultValue = "10") int pageSize,
-                                                     @RequestParam(defaultValue = "created_at") String sortName,
+                                                     @RequestParam(defaultValue = "createAt") String sortName,
                                                      @RequestParam(defaultValue = "DESC") String sortType) {
 
         // Tạo một biến Sort.Direction để lưu hướng sắp xếp
