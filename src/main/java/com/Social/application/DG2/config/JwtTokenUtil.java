@@ -25,6 +25,9 @@ public class JwtTokenUtil {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
 
+    @Value("${jwt.expiration}")
+    private int jwtExpirationInMs;
+
     @Autowired
     private UsersRepository usersRepository;
 
@@ -45,7 +48,7 @@ public class JwtTokenUtil {
                 .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
     private Key getSignKey() {
