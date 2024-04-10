@@ -1,6 +1,5 @@
 package com.Social.application.DG2.controller;
 
-import com.Social.application.DG2.config.JwtAuthenticationFilter;
 import com.Social.application.DG2.dto.UsersDto;
 import com.Social.application.DG2.service.Impl.UsersServiceImpl;
 import com.Social.application.DG2.util.annotation.CheckLogin;
@@ -40,8 +39,6 @@ public class UsersController {
     private ModelMapper modelMapper;
     @Autowired
     private UsersServiceImpl registerService;
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username,

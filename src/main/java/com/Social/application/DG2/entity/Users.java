@@ -4,13 +4,18 @@ import com.Social.application.DG2.entity.Enum.EnableType;
 import com.Social.application.DG2.entity.Enum.RoleType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.*;
 
 @Entity
-@Data
+@Setter
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+
 @Table(name = "users")
 public class Users {
     @Id
@@ -68,7 +73,7 @@ public class Users {
     @Column(name = "updated_at")
     private Timestamp updateAt;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "follows",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -77,27 +82,10 @@ public class Users {
     @Column(name = "created_at")
     private Set<Users> followingUser = new HashSet<>();
 
-
-//    @ElementCollection
-//    @CollectionTable(name = "follows",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "following_user_id"})
-//    )
-//    @MapKeyJoinColumn(name = "following_user_id")
-//    @Column(name = "created_at")
-//    @Temporal(TemporalType.TIMESTAMP)
-//    private Map<Users, Timestamp> followingUser = new HashMap<>();
-
     @PrePersist
     protected void onCreate() {
         createAt = new Timestamp(new Date().getTime());
     }
-
-
-//    @PreUpdate
-//    protected void onUpdate() {
-//        updateAt = new Timestamp(new Date().getTime());
-//    }
 
 }
 
