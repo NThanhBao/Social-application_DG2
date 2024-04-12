@@ -1,11 +1,17 @@
 package com.Social.application.DG2.controller;
 
+import com.Social.application.DG2.config.JwtAuthenticationFilter;
+import com.Social.application.DG2.dto.SearchUserDto;
 import com.Social.application.DG2.dto.UsersDto;
 import com.Social.application.DG2.service.Impl.UsersServiceImpl;
+import com.Social.application.DG2.service.SearchUsersService;
 import com.Social.application.DG2.util.annotation.CheckLogin;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,13 +29,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 @Controller
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/auth")
+@RequestMapping("/user")
 public class UsersController {
     @Autowired
     private UsersService userService;
@@ -40,6 +47,10 @@ public class UsersController {
     @Autowired
     private UsersServiceImpl registerService;
 
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private SearchUsersService searchUsersService;
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username,
                                    @RequestParam String password,
@@ -56,19 +67,59 @@ public class UsersController {
 
                 return  ResponseEntity.ok(responseData);
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("sai username hoặc password.");
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity<?> addNewUser(@RequestBody UsersDto registerDTO) {
         return registerService.addUser(registerDTO);
     }
 
-    @CheckLogin
-    @GetMapping("/checktoken")
-    public ResponseEntity<String> protectedApi(HttpServletRequest request) {
-        return ResponseEntity.ok("chỉ khi JWT đúng thì mới xem được thông tin này");
+    @GetMapping("/search")
+    public ResponseEntity<List<SearchUserDto>> searchUsersByFullName(@RequestParam String fullName,
+                                                                     @RequestParam(defaultValue = "0") int page,
+                                                                     @RequestParam(defaultValue = "10") int pageSize,
+                                                                     @RequestParam(defaultValue = "createAt") String sortName,
+                                                                     @RequestParam(defaultValue = "DESC") String sortType) {
+        try {
+            Sort.Direction direction;
+            if (sortType.equalsIgnoreCase("ASC")) {
+                direction = Sort.Direction.ASC;
+            } else {
+                direction = Sort.Direction.DESC;
+            }
+            Pageable sortedByName = PageRequest.of(page, pageSize, Sort.by(direction, sortName));
+            Page<SearchUserDto> usersPage = searchUsersService.findByFullNameContaining(fullName, sortedByName);
+            return ResponseEntity.ok().body(usersPage.getContent());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
+    @CheckLogin
+    @PutMapping("/update")
+    public ResponseEntity<String> updateUser(@RequestBody UsersDto updatedUserDto) {
+        try {
+            ResponseEntity<String> response;
+            response = userService.updateUser(updatedUserDto);
+            return response;
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật người dùng: " + e.getMessage());
+        }
+    }
+
+    @CheckLogin
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUser(@RequestParam String username) {
+        try {
+            ResponseEntity<String> response;
+            response = userService.deleteUser(username);
+            return response;
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi xóa người dùng: " + e.getMessage());
+        }
+    }
+
 }
 

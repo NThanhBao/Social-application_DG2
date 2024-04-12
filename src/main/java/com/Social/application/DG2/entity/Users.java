@@ -2,6 +2,7 @@ package com.Social.application.DG2.entity;
 
 import com.Social.application.DG2.entity.Enum.EnableType;
 import com.Social.application.DG2.entity.Enum.RoleType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
@@ -21,6 +22,7 @@ public class Users {
     @Id
     @Column(length = 36)
     @NotNull
+    @EqualsAndHashCode.Include
     private String id;
 
     @Column(name = "username", nullable = false, unique = true)
@@ -86,5 +88,9 @@ public class Users {
         createAt = new Timestamp(new Date().getTime());
     }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updateAt = new Timestamp(new Date().getTime());
+    }
 }
 
