@@ -2,6 +2,7 @@ package com.Social.application.DG2.controller;
 
 import com.Social.application.DG2.dto.UsersDto;
 import com.Social.application.DG2.service.Impl.UsersServiceImpl;
+import com.Social.application.DG2.util.annotation.CheckEnableType;
 import com.Social.application.DG2.util.annotation.CheckLogin;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +41,7 @@ public class UsersController {
     @Autowired
     private UsersServiceImpl registerService;
 
+    @CheckEnableType
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username,
                                    @RequestParam String password,

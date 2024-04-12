@@ -1,6 +1,9 @@
 package com.Social.application.DG2.util.annotation;
 
 import com.Social.application.DG2.config.JwtTokenUtil;
+import com.Social.application.DG2.entity.Enum.EnableType;
+import com.Social.application.DG2.entity.Users;
+import com.Social.application.DG2.repositories.UsersRepository;
 import com.Social.application.DG2.util.exception.UnauthorizedException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
