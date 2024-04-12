@@ -1,6 +1,7 @@
 package com.Social.application.DG2.service.Impl;
 
 import com.Social.application.DG2.dto.UsersDto;
+import com.Social.application.DG2.entity.Enum.EnableType;
 import com.Social.application.DG2.entity.Users;
 import com.Social.application.DG2.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import com.Social.application.DG2.repositories.UsersRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -72,5 +75,46 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public Users getUserByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+
+    @Override
+    public ResponseEntity<String> updateUser(UsersDto updatedUserDto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+        Users users = userRepository.findByUsername(currentUsername);
+
+        if (!users.getUsername().equals(updatedUserDto.getUsername())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn không có quyền sửa đổi thông tin người dùng khác.");
+        }
+
+        Users existingUser = userRepository.findByUsername(updatedUserDto.getUsername());
+
+        existingUser.setFirstName(updatedUserDto.getFirstName());
+        existingUser.setLastName(updatedUserDto.getLastName());
+        existingUser.setGender(updatedUserDto.isGender());
+        existingUser.setPhoneNumber(updatedUserDto.getPhoneNumber());
+        existingUser.setDateOfBirth(updatedUserDto.getDateOfBirth());
+        existingUser.setAddress(updatedUserDto.getAddress());
+        existingUser.setMail(updatedUserDto.getMail());
+
+        registerRepository.save(existingUser);
+        return ResponseEntity.ok("Cập nhật thành công username: " + existingUser.getUsername());
+    }
+
+    @Override
+    public ResponseEntity<String> deleteUser(String username) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+
+        Users users = userRepository.findByUsername(currentUsername);
+        Users userDelete = userRepository.findByUsername(username);
+
+        if (!users.getUsername().equals(username)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bạn không có quyền xóa người dùng khác.");
+        }
+        userDelete.setEnableType(EnableType.FALSE);
+        userRepository.save(userDelete);
+        return ResponseEntity.ok("Bạn đã xóa thành công tài khoản của mình. ");
     }
 }
