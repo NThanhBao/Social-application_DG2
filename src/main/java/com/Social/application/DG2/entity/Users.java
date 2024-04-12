@@ -86,5 +86,9 @@ public class Users {
         createAt = new Timestamp(new Date().getTime());
     }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updateAt = new Timestamp(new Date().getTime());
+    }
 }
 

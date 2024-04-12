@@ -13,5 +13,6 @@ public interface UsersService extends UserDetailsService {
      Users getUserByUsername(String username);
 
     ResponseEntity<String> addUser(UsersDto registerDTO);
-
+    ResponseEntity<String> updateUser(UsersDto updatedUserDto);
+    ResponseEntity<String> deleteUser(String username);
 }
