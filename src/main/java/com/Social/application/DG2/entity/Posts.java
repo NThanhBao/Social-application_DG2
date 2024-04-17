@@ -1,6 +1,9 @@
 package com.Social.application.DG2.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -11,12 +14,18 @@ import java.util.UUID;
 @Table(name = "posts")
 public class Posts {
     @Id
-    @Column(name = "id", columnDefinition = "CHAR(36)")
-    private UUID postsId;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
+//    public Posts() {
+//        this.id = UUID.randomUUID().toString();
+//    }
 
     private String title;
 
+    @Column
+    @NotNull
     private String body;
 
     private String status;
@@ -29,7 +38,7 @@ public class Posts {
 
     @ManyToOne
     @JoinColumn(name = "created_by")
-    private Users usersId;
+    private Users userId;
 
     @Column(name = "created_at")
     private Timestamp createAt;

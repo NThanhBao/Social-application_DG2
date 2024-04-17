@@ -2,6 +2,8 @@ package com.Social.application.DG2.entity;
 
 import com.Social.application.DG2.entity.Enum.EnableType;
 import com.Social.application.DG2.entity.Enum.RoleType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
@@ -15,7 +17,6 @@ import java.util.*;
 @Setter
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-
 @Table(name = "users")
 public class Users {
     @Id
@@ -73,6 +74,7 @@ public class Users {
     @Column(name = "updated_at")
     private Timestamp updateAt;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "follows",

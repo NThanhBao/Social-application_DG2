@@ -17,16 +17,14 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/follow")
 public class FollowController {
 
     @Autowired
     private FollowService followService;
-    @Autowired
-    private UsersRepository usersRepository;
 
     @CheckLogin
-    @PostMapping("/follow/{followingUserId}")
+    @PostMapping("user/{followingUserId}")
     public ResponseEntity<String> followUser(@PathVariable String followingUserId) {
         followService.followUser(followingUserId);
         return new ResponseEntity<>("User followed successfully", HttpStatus.OK);
@@ -91,7 +89,7 @@ public class FollowController {
         return ResponseEntity.ok(followerUsers.getContent());
     }
 
-    @DeleteMapping("/auth/unfollow/{followingUserId}")
+    @DeleteMapping("/unfollow/{followingUserId}")
     public ResponseEntity<String> unfollowUser(@PathVariable String followingUserId) {
         followService.unfollowUser(followingUserId);
         return new ResponseEntity<>("User unfollowed successfully", HttpStatus.OK);
