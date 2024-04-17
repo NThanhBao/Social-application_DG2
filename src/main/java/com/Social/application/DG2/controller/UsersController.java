@@ -51,7 +51,8 @@ public class UsersController {
     @Autowired
     private SearchUsersService searchUsersService;
     @CheckEnableType
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
+
     public ResponseEntity<?> login(@RequestParam String username,
                                    @RequestParam String password,
                                    HttpServletResponse response) {
