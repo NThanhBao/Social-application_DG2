@@ -1,12 +1,11 @@
 package com.Social.application.DG2.controller;
 
-import com.Social.application.DG2.config.JwtAuthenticationFilter;
 import com.Social.application.DG2.dto.SearchUserDto;
 import com.Social.application.DG2.dto.UsersDto;
 import com.Social.application.DG2.service.Impl.UsersServiceImpl;
 import com.Social.application.DG2.service.SearchUsersService;
+import com.Social.application.DG2.util.annotation.CheckEnableType;
 import com.Social.application.DG2.util.annotation.CheckLogin;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,8 +35,8 @@ import java.util.Map;
 
 @Controller
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:8080")
+@RequestMapping("/user")
 public class UsersController {
     @Autowired
     private UsersService userService;
@@ -47,11 +46,10 @@ public class UsersController {
     private ModelMapper modelMapper;
     @Autowired
     private UsersServiceImpl registerService;
-
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired
     private SearchUsersService searchUsersService;
+
+    @CheckEnableType
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username,
                                    @RequestParam String password,
@@ -72,15 +70,9 @@ public class UsersController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity<?> addNewUser(@RequestBody UsersDto registerDTO) {
         return registerService.addUser(registerDTO);
-    }
-
-    @CheckLogin
-    @GetMapping("/checktoken")
-    public ResponseEntity<String> protectedApi(HttpServletRequest request) {
-        return ResponseEntity.ok("chỉ khi JWT đúng thì mới xem được thông tin này");
     }
 
     @GetMapping("/search")
