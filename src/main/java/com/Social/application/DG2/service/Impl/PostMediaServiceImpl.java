@@ -59,11 +59,10 @@ public class PostMediaServiceImpl implements PostMediaService {
                     .object(filepath)
                     .build()
             );
-            throw new NotFoundException("Lỗi khi xóa tệp đính kèm từ MinIO: ");
         } catch (MinioException e) {
-            throw new NotFoundException("Lỗi khi xóa tệp đính kèm từ MinIO: ");
+            throw new RuntimeException("Lỗi khi xóa tệp đính kèm từ MinIO: " + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi không xác định khi xóa bài post và tệp đính kèm", e);
+            throw new RuntimeException("Lỗi không xác định khi xóa bài post và tệp đính kèm"+ e.getMessage());
         }
     }
 

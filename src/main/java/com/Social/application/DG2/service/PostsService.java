@@ -9,8 +9,15 @@ import java.util.UUID;
 
 public interface PostsService {
     Posts createPosts(PostsDto post);
-    List<Posts> getPostsByUserId(UUID userId);
-    List<Posts> getAllPosts();
-    //    String updatePosts(UUID postId, PostsDto postDto);
+    void updatePost(UUID postId, PostsDto updatedPost);
     void deletePost(UUID postId);
+
+    List<Posts> getPostsByUserId(UUID userId);
+    int getNumberOfPostsByUserId(UUID userId);
+
+    List<Posts> getAllPosts();
+    int getNumberOfPosts();
+
+    List<Posts> getListOfPostsByLoggedInUser();
+    int getNumberOfPostsByLoggedInUser();
 }

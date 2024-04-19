@@ -25,6 +25,7 @@ public class FollowController {
 
     @CheckLogin
     @PostMapping("user/{followingUserId}")
+
     public ResponseEntity<String> followUser(@PathVariable String followingUserId) {
         followService.followUser(followingUserId);
         return new ResponseEntity<>("User followed successfully", HttpStatus.OK);

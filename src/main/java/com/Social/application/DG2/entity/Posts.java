@@ -14,13 +14,13 @@ import java.util.UUID;
 @Table(name = "posts")
 public class Posts {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    private String id;
 
-//    public Posts() {
-//        this.id = UUID.randomUUID().toString();
-//    }
+    public Posts() {
+        this.id = UUID.randomUUID().toString();
+    }
+
 
     private String title;
 

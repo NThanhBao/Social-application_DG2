@@ -1,13 +1,11 @@
 package com.Social.application.DG2.controller;
 
-import com.Social.application.DG2.config.JwtAuthenticationFilter;
 import com.Social.application.DG2.dto.SearchUserDto;
 import com.Social.application.DG2.dto.UsersDto;
 import com.Social.application.DG2.service.Impl.UsersServiceImpl;
 import com.Social.application.DG2.service.SearchUsersService;
 import com.Social.application.DG2.util.annotation.CheckEnableType;
 import com.Social.application.DG2.util.annotation.CheckLogin;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,6 +48,7 @@ public class UsersController {
     private UsersServiceImpl registerService;
     @Autowired
     private SearchUsersService searchUsersService;
+
     @CheckEnableType
     @PostMapping("/login")
 

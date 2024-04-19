@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface PostsRepository extends JpaRepository<Posts, UUID> {
+public interface PostsRepository extends JpaRepository<Posts, String> {
     List<Posts> findByUserId(Users user);
-
     @Transactional
     @Modifying
     @Query("DELETE FROM Posts p WHERE p.id = :postId")
-    void deleteById(UUID postId);
+    void deleteById(String postId);
+    int countByUserId(Users user);
 }

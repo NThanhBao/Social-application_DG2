@@ -7,9 +7,9 @@ import com.Social.application.DG2.mapper.PostsMapper;
 import com.Social.application.DG2.repositories.PostsRepository;
 import com.Social.application.DG2.repositories.UsersRepository;
 import com.Social.application.DG2.service.PostsService;
+import com.Social.application.DG2.util.annotation.CheckLogin;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +28,6 @@ public class PostsServiceImpl implements PostsService{
         this.postsRepository = postsRepository;
         this.usersRepository = usersRepository;
     }
-
     @Override
     public Posts createPosts(PostsDto postDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -40,7 +39,7 @@ public class PostsServiceImpl implements PostsService{
         }
 
         Posts post = new Posts();
-        post.setId(UUID.randomUUID());
+        post.setId(UUID.randomUUID().toString());
         post.setTitle(postDto.getTitle());
         post.setBody(postDto.getBody());
         post.setStatus(postDto.getStatus());
@@ -51,6 +50,59 @@ public class PostsServiceImpl implements PostsService{
         post.setUserId(currentUser);
         post.setCreateAt(new Timestamp(System.currentTimeMillis()));
         return postsRepository.save(post);
+    }
+
+    public void updatePost(UUID postId, PostsDto updatedPost) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+        Users currentUser = usersRepository.findByUsername(currentUsername);
+
+        if (currentUser == null) {
+            throw new EntityNotFoundException("Không tìm thấy người dùng hiện tại");
+        }
+
+        Optional<Posts> optionalPost = postsRepository.findById(postId.toString());
+        if (!optionalPost.isPresent()) {
+            throw new EntityNotFoundException("Không tìm thấy bài đăng có ID: " + postId);
+        }
+
+        Posts post = optionalPost.get();
+
+        if (!post.getUserId().equals(currentUser)) {
+            throw new AccessDeniedException("Bạn không có quyền cập nhật bài đăng này");
+        }
+
+        // Cập nhật thông tin của bài đăng
+        post.setTitle(updatedPost.getTitle());
+        post.setBody(updatedPost.getBody());
+        post.setStatus(updatedPost.getStatus());
+        // Cập nhật ngày chỉnh sửa
+        post.setCreateAt(new Timestamp(System.currentTimeMillis()));
+
+        postsRepository.save(post);
+    }
+
+    @Override
+    public void deletePost(UUID postId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+        Users currentUser = usersRepository.findByUsername(currentUsername);
+
+        if (currentUser == null) {
+            throw new EntityNotFoundException("Không tìm thấy người dùng hiện tại");
+        }
+
+        Optional<Posts> optionalPost = postsRepository.findById(postId.toString());
+        if (!optionalPost.isPresent()) {
+            throw new EntityNotFoundException("Không tìm thấy bài đăng có ID: " + postId);
+        }
+
+        Posts post = optionalPost.get();
+        if (!post.getUserId().equals(currentUser)) {
+            throw new AccessDeniedException("Bạn không có quyền Xóa bài đăng này");
+        }
+
+        postsRepository.deleteById(post.toString());
     }
 
     @Override
@@ -65,30 +117,49 @@ public class PostsServiceImpl implements PostsService{
     }
 
     @Override
+    public int getNumberOfPostsByUserId(UUID userId) {
+        Optional<Users> userOptional = usersRepository.findById(String.valueOf(userId));
+        if (userOptional.isPresent()) {
+            Users user = userOptional.get();
+            return postsRepository.countByUserId(user);
+        } else {
+            throw new EntityNotFoundException("User not found with ID: " + userId);
+        }
+    }
+
+    @Override
     public List<Posts> getAllPosts() {
         return postsRepository.findAll();
     }
 
     @Override
-    public void deletePost(UUID postId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = auth.getName();
-        Users currentUser = usersRepository.findByUsername(currentUsername);
+    public int getNumberOfPosts() {
+        List<Posts> allPosts = postsRepository.findAll();
+        return allPosts.size();
+    }
 
-        if (currentUser == null) {
-            throw new EntityNotFoundException("Current user not found");
-        }
 
-        Optional<Posts> optionalPost = postsRepository.findById(postId);
-        if (optionalPost.isPresent()) {
-            Posts post = optionalPost.get();
-
-            if (!post.getUserId().equals(currentUser)) {
-                throw new AccessDeniedException("You don't have permission to delete this post");
-            }
-            postsRepository.deleteById(postId);
+    @Override
+    public List<Posts> getListOfPostsByLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        Users users = usersRepository.findByUsername(currentUsername);
+        if (users != null) {
+            return postsRepository.findByUserId(users);
         } else {
-            throw new EntityNotFoundException("Post not found with ID: " + postId);
+            throw new EntityNotFoundException("User not found with username: " + currentUsername);
+        }
+    }
+
+    @Override
+    public int getNumberOfPostsByLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        Users users = usersRepository.findByUsername(currentUsername);
+        if (users != null) {
+            return postsRepository.countByUserId(users);
+        } else {
+            throw new EntityNotFoundException("User not found with username: " + currentUsername);
         }
     }
 }
