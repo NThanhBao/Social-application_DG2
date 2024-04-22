@@ -37,7 +37,7 @@ import java.util.Map;
 @Controller
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/auth")
+@RequestMapping("/user")
 public class UsersController {
     @Autowired
     private UsersService userService;
@@ -52,7 +52,7 @@ public class UsersController {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired
     private SearchUsersService searchUsersService;
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestParam String username,
                                    @RequestParam String password,
                                    HttpServletResponse response) {
@@ -72,15 +72,9 @@ public class UsersController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity<?> addNewUser(@RequestBody UsersDto registerDTO) {
         return registerService.addUser(registerDTO);
-    }
-
-    @CheckLogin
-    @GetMapping("/checktoken")
-    public ResponseEntity<String> protectedApi(HttpServletRequest request) {
-        return ResponseEntity.ok("chỉ khi JWT đúng thì mới xem được thông tin này");
     }
 
     @GetMapping("/search")
