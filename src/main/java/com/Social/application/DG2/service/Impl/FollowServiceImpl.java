@@ -78,6 +78,9 @@ public class FollowServiceImpl implements FollowService {
     public void unfollowUser(String followingUserId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
+        if (currentUsername == null) {
+            throw new NotFoundException("không tìm thấy thông tin của người dùng.");
+        }
 
         Users currentUser = usersRepository.findByUsername(currentUsername);
         Users followingUser = usersRepository.findById(followingUserId)

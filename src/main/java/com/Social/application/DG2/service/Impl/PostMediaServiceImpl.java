@@ -1,5 +1,6 @@
 package com.Social.application.DG2.service.Impl;
 
+import com.Social.application.DG2.config.MinIOConfig;
 import com.Social.application.DG2.entity.Users;
 import com.Social.application.DG2.repositories.UsersRepository;
 import com.Social.application.DG2.service.PostMediaService;
@@ -10,35 +11,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 @Service
 public class PostMediaServiceImpl implements PostMediaService {
     @Autowired
     private MinioClient minioClient;
     @Autowired
+    private MinIOConfig minIOConfig;
+    @Autowired
     private UsersRepository usersRepository;
     String bucketName = "posts";
 
     @Override
-    public void uploadPost(String filePath) throws Exception {
+    public void uploadPost(MultipartFile filePath) throws Exception {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
         Users currentUser = usersRepository.findByUsername(currentUsername);
         String userId = currentUser.getId();
 
-        try (InputStream inputStream = new FileInputStream(filePath)) {
-            String objectName = userId + "/" + new File(filePath).getName();
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(objectName)
-                            .stream(inputStream, inputStream.available(), -1)
-                            .contentType(getContentType(objectName))
-                            .build()
-            );
-        }catch (Exception e) {
+        try {
+            // Kiểm tra bucketName
+            minIOConfig.checkBucketName(minioClient);
+
+            try (InputStream inputStream = new BufferedInputStream(filePath.getInputStream())) {
+                String originalFileName = filePath.getOriginalFilename();
+                String objectName = userId + "/" + originalFileName;
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(objectName)
+                                .stream(inputStream, inputStream.available(), -1)
+                                .contentType(getContentType(objectName))
+                                .build()
+                );
+            }
+        } catch (Exception e) {
             throw new Exception("Error uploading file to MinIO", e);
         }
     }
@@ -51,20 +63,28 @@ public class PostMediaServiceImpl implements PostMediaService {
         String userId = currentUser.getId();
 
         try {
-            String filepath =userId + "/" + objectName;
+            String filepath = userId + "/" + objectName;
 
+            // Kiểm tra xem tệp tồn tại trên MinIO hay không
+            minioClient.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(filepath)
+                            .build()
+            );
+
+            // Nếu tệp tồn tại, thực hiện xóa
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
-                    .bucket(bucketName)
-                    .object(filepath)
-                    .build()
+                            .bucket(bucketName)
+                            .object(filepath)
+                            .build()
             );
-        } catch (MinioException e) {
-            throw new RuntimeException("Lỗi khi xóa tệp đính kèm từ MinIO: " + e.getMessage());
-        } catch (Exception e) {
-            throw new RuntimeException("Lỗi không xác định khi xóa bài post và tệp đính kèm"+ e.getMessage());
+        } catch (MinioException | InvalidKeyException | IOException | NoSuchAlgorithmException e) {
+            throw new NotFoundException("Không tìm thấy tệp đính kèm từ MinIO: " + e.getMessage());
         }
     }
+
 
     private String getContentType(String fileName) {
         String fileExtension = getFileExtension(fileName).toLowerCase();

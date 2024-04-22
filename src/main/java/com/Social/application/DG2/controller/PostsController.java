@@ -5,17 +5,25 @@ import com.Social.application.DG2.entity.Posts;
 import com.Social.application.DG2.service.PostMediaService;
 import com.Social.application.DG2.service.PostsService;
 import com.Social.application.DG2.util.annotation.CheckLogin;
+import com.Social.application.DG2.util.exception.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/posts")
 public class PostsController {
     private final PostsService postsService;
@@ -33,30 +41,7 @@ public class PostsController {
         Posts newPost = postsService.createPosts(postDto);
         return new ResponseEntity<>(newPost, HttpStatus.CREATED);
     }
-
-    @GetMapping("/get/user/{userId}")
-    public ResponseEntity<List<Posts>> getPostsByUserId(@PathVariable("userId") UUID userId) {
-        List<Posts> posts = postsService.getPostsByUserId(userId);
-        return new ResponseEntity<>(posts, HttpStatus.OK);
-    }
-
-    @GetMapping("/getAll")
-    public ResponseEntity<List<Posts>> getAllPosts() {
-        List<Posts> posts = postsService.getAllPosts();
-        return new ResponseEntity<>(posts, HttpStatus.OK);
-    }
-
-    @GetMapping("/getAll/count")
-    public ResponseEntity<Integer> getNumberOfPosts() {
-        int numberOfPosts = postsService.getNumberOfPosts();
-        return new ResponseEntity<>(numberOfPosts, HttpStatus.OK);
-    }
-
-    @GetMapping("/get/count/user/{userId}")
-    public int getNumberOfPostsByUserId() {
-        return postsService.getNumberOfPostsByUserId();
-    }
-
+    @CheckLogin
     @PutMapping("/{postId}")
     public ResponseEntity<String> updatePost(@PathVariable("postId") UUID postId, @RequestBody PostsDto updatedPost) {
         try {
@@ -68,7 +53,7 @@ public class PostsController {
             return new ResponseEntity<>("An error occurred while updating the post", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    @CheckLogin
     @DeleteMapping("/{postId}")
     public ResponseEntity<String> deletePost(@PathVariable("postId") UUID postId) {
         try {
@@ -81,9 +66,64 @@ public class PostsController {
         }
     }
 
+    @GetMapping("/userList/{userId}")
+    public ResponseEntity<List<Posts>> getPostsByUserId(@PathVariable("userId") UUID userId,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int pageSize,
+                                                        @RequestParam(defaultValue = "createAt") String sortName,
+                                                        @RequestParam(defaultValue = "DESC") String sortType
+                                                        ) {
+        try{
+            Sort.Direction direction;
+            if (sortType.equalsIgnoreCase("ASC")) {
+                direction = Sort.Direction.ASC;
+            } else {
+                direction = Sort.Direction.DESC;
+            }
+            Pageable sortedByName = PageRequest.of(page, pageSize, Sort.by(direction, sortName));
+            Page<Posts> posts = postsService.getPostsByUserId(sortedByName, userId);
+            return ResponseEntity.ok().body(posts.getContent());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/allList")
+    public ResponseEntity<List<Posts>> getAllPosts(@RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "10") int pageSize,
+                                                    @RequestParam(defaultValue = "createAt") String sortName,
+                                                    @RequestParam(defaultValue = "DESC") String sortType
+                                            ) {
+        try {
+            Sort.Direction direction;
+            if (sortType.equalsIgnoreCase("ASC")) {
+                direction = Sort.Direction.ASC;
+            } else {
+                direction = Sort.Direction.DESC;
+            }
+            Pageable sortedByName = PageRequest.of(page, pageSize, Sort.by(direction, sortName));
+            List<Posts> posts = postsService.getAllPosts(sortedByName);
+            return new ResponseEntity<>(posts, HttpStatus.OK);
+        } catch ( Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/all/count")
+    public ResponseEntity<Integer> getNumberOfPosts() {
+        int numberOfPosts = postsService.getNumberOfPosts();
+        return new ResponseEntity<>(numberOfPosts, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/count/{userId}")
+    public ResponseEntity<Integer> getNumberOfPostsByUserId(@PathVariable("userId") UUID userId) {
+        int numberOfPosts = postsService.getNumberOfPostsByUserId(userId);
+        return ResponseEntity.ok(numberOfPosts);
+    }
+
     @CheckLogin
-    @PostMapping("/upload/{filepath}")
-    public ResponseEntity<String> uploadPostVideo(@RequestParam("filePath") String filePath) {
+    @PostMapping(value = "/upload/{filePath}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<String> uploadPostVideo(@RequestParam("filePath") MultipartFile filePath) {
         try {
             postService.uploadPost(filePath);
             return ResponseEntity.ok("File uploaded successfully!");
@@ -94,14 +134,48 @@ public class PostsController {
     }
 
     @CheckLogin
-    @DeleteMapping("/delete/{filepath}")
+    @DeleteMapping("/delete/{filePath}")
     public ResponseEntity<String> deletePostVideos(@RequestParam("filePath") String filePath) {
         try {
             postService.deletePost(filePath);
             return ResponseEntity.ok("File deleted successfully!");
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting file: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error deleting file: " + e.getMessage());
+        }
+    }
+
+    @CheckLogin
+    @GetMapping("/count")
+    public ResponseEntity<Integer> getNumberOfPostsByLoggedInUser() {
+        try {
+            int numberOfPosts = postsService.getNumberOfPostsByLoggedInUser();
+            return ResponseEntity.ok(numberOfPosts);
+        } catch (EntityNotFoundException ex) {
+            throw new NotFoundException("User not found"+ ex);
+        }
+    }
+
+    @CheckLogin
+    @GetMapping("/userList")
+    public ResponseEntity<List<Posts>> getListOfPostsByLoggedInUser(
+                                        @RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10") int pageSize,
+                                        @RequestParam(defaultValue = "createAt") String sortName,
+                                        @RequestParam(defaultValue = "DESC") String sortType
+                                        ) {
+        try {
+            Sort.Direction direction;
+            if (sortType.equalsIgnoreCase("ASC")) {
+                direction = Sort.Direction.ASC;
+            } else {
+                direction = Sort.Direction.DESC;
+            }
+            Pageable sortedByName = PageRequest.of(page, pageSize, Sort.by(direction, sortName));
+            Page<Posts> posts = postsService.getListOfPostsByLoggedInUser(sortedByName);
+            return ResponseEntity.ok().body(posts.getContent());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
