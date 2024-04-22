@@ -13,7 +13,11 @@ public class Medias {
 
     @Column(name = "id", columnDefinition = "CHAR(36)")
 
-    private UUID mediasId;
+    private String id;
+
+    public Medias() {
+        this.id = UUID.randomUUID().toString();
+    }
 
     @Column(name = "base_name")
     private String baseName;
@@ -24,4 +28,8 @@ public class Medias {
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Posts postsId;
+
+    public Medias(String id) {
+        this.id = id;
+    }
 }

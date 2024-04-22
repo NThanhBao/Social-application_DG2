@@ -1,9 +1,11 @@
 package com.Social.application.DG2.service.Impl;
 
 import com.Social.application.DG2.config.MinIOConfig;
+import com.Social.application.DG2.entity.Medias;
 import com.Social.application.DG2.entity.Users;
+import com.Social.application.DG2.repositories.MediaRepository;
 import com.Social.application.DG2.repositories.UsersRepository;
-import com.Social.application.DG2.service.PostMediaService;
+import com.Social.application.DG2.service.MediaService;
 import com.Social.application.DG2.util.exception.NotFoundException;
 import io.minio.*;
 import io.minio.errors.MinioException;
@@ -16,19 +18,39 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 @Service
-public class PostMediaServiceImpl implements PostMediaService {
+public class MediaServiceImpl implements MediaService {
     @Autowired
     private MinioClient minioClient;
     @Autowired
     private MinIOConfig minIOConfig;
     @Autowired
     private UsersRepository usersRepository;
+    @Autowired
+    private MediaRepository mediaRepository;
     String bucketName = "posts";
 
     @Override
-    public void uploadPost(MultipartFile filePath) throws Exception {
+    public void createMedia(MultipartFile filePath) throws Exception {
+//        String publicUrl = uploadMedia(filePath);
+//
+//        if (publicUrl == null || publicUrl.isEmpty()) {
+//            throw new NotFoundException("not found Url");
+//        }
+//
+//        Medias medias = new Medias();
+//        medias.setId(UUID.randomUUID().toString());
+//        medias.setBaseName(filePath.getName());
+//        medias.setPublicUrl(objectName);
+//
+//        mediaRepository.save(medias);
+
+    }
+
+    @Override
+    public void uploadMedia(MultipartFile filePath) throws Exception {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
         Users currentUser = usersRepository.findByUsername(currentUsername);
@@ -49,11 +71,20 @@ public class PostMediaServiceImpl implements PostMediaService {
                                 .contentType(getContentType(objectName))
                                 .build()
                 );
+
+                Medias medias = new Medias();
+                medias.setId(UUID.randomUUID().toString());
+                medias.setBaseName(filePath.getOriginalFilename());
+                medias.setPublicUrl(objectName);
+
+                mediaRepository.save(medias);
+
             }
         } catch (Exception e) {
             throw new Exception("Error uploading file to MinIO", e);
         }
     }
+
 
     @Override
     public void deletePost(String objectName) {
@@ -97,7 +128,7 @@ public class PostMediaServiceImpl implements PostMediaService {
             case "avi" -> "video/x-msvideo";
             case "mov" -> "video/quicktime";
             case "wmv" -> "video/x-ms-wmv";
-            default -> "application/octet-stream"; // Kiểu MIME mặc định
+            default -> "application/octet-stream";
         };
     }
 

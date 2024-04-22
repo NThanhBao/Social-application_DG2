@@ -4,8 +4,10 @@ import com.Social.application.DG2.service.AvatarService;
 import com.Social.application.DG2.util.annotation.CheckLogin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -17,8 +19,8 @@ public class AvatarController {
     private AvatarService minioStorageService;
 
     @CheckLogin
-    @PostMapping("/upload/{filepath}")
-    public ResponseEntity<String> uploadAvatar(@RequestParam("filePath") String filePath) {
+    @PostMapping(value ="/upload/{filepath}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<String> uploadAvatar(@RequestParam("filePath") MultipartFile filePath) {
         try {
             minioStorageService.uploadAvatar(filePath);
             return ResponseEntity.ok("File uploaded successfully!");
@@ -29,8 +31,8 @@ public class AvatarController {
     }
 
     @CheckLogin
-    @PostMapping("/upload/background/{filepath}")
-    public ResponseEntity<String> uploadBackGround(@RequestParam("filePath") String filePath) {
+    @PostMapping(value = "/upload/background/{filepath}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<String> uploadBackGround(@RequestParam("filePath") MultipartFile filePath) {
         try {
             minioStorageService.uploadBackGround(filePath);
             return ResponseEntity.ok("File uploaded successfully!");

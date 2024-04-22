@@ -2,7 +2,7 @@ package com.Social.application.DG2.controller;
 
 import com.Social.application.DG2.dto.PostsDto;
 import com.Social.application.DG2.entity.Posts;
-import com.Social.application.DG2.service.PostMediaService;
+import com.Social.application.DG2.service.MediaService;
 import com.Social.application.DG2.service.PostsService;
 import com.Social.application.DG2.util.annotation.CheckLogin;
 import com.Social.application.DG2.util.exception.NotFoundException;
@@ -28,7 +28,7 @@ import java.util.UUID;
 public class PostsController {
     private final PostsService postsService;
     @Autowired
-    private PostMediaService postService;
+    private MediaService postService;
 
     @Autowired
     public PostsController(PostsService postsService) {
@@ -109,13 +109,13 @@ public class PostsController {
         }
     }
 
-    @GetMapping("/all/count")
+    @GetMapping("/allCount")
     public ResponseEntity<Integer> getNumberOfPosts() {
         int numberOfPosts = postsService.getNumberOfPosts();
         return new ResponseEntity<>(numberOfPosts, HttpStatus.OK);
     }
 
-    @GetMapping("/user/count/{userId}")
+    @GetMapping("/userCount/{userId}")
     public ResponseEntity<Integer> getNumberOfPostsByUserId(@PathVariable("userId") UUID userId) {
         int numberOfPosts = postsService.getNumberOfPostsByUserId(userId);
         return ResponseEntity.ok(numberOfPosts);
@@ -125,7 +125,7 @@ public class PostsController {
     @PostMapping(value = "/upload/{filePath}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<String> uploadPostVideo(@RequestParam("filePath") MultipartFile filePath) {
         try {
-            postService.uploadPost(filePath);
+            postService.uploadMedia(filePath);
             return ResponseEntity.ok("File uploaded successfully!");
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,7 +146,7 @@ public class PostsController {
     }
 
     @CheckLogin
-    @GetMapping("/count")
+    @GetMapping("/userCount")
     public ResponseEntity<Integer> getNumberOfPostsByLoggedInUser() {
         try {
             int numberOfPosts = postsService.getNumberOfPostsByLoggedInUser();

@@ -1,35 +1,39 @@
 package com.Social.application.DG2.service.Impl;
 
 import com.Social.application.DG2.dto.PostsDto;
+import com.Social.application.DG2.entity.Medias;
 import com.Social.application.DG2.entity.Posts;
 import com.Social.application.DG2.entity.Users;
-import com.Social.application.DG2.mapper.PostsMapper;
+import com.Social.application.DG2.repositories.MediaRepository;
 import com.Social.application.DG2.repositories.PostsRepository;
 import com.Social.application.DG2.repositories.UsersRepository;
 import com.Social.application.DG2.service.PostsService;
-import com.Social.application.DG2.util.annotation.CheckLogin;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class PostsServiceImpl implements PostsService{
-    private final PostsRepository postsRepository;
-    private final UsersRepository usersRepository;
-    public PostsServiceImpl(PostsRepository postsRepository, UsersRepository usersRepository) {
-        this.postsRepository = postsRepository;
-        this.usersRepository = usersRepository;
-    }
+    @Autowired
+    private  PostsRepository postsRepository;
+    @Autowired
+    private  UsersRepository usersRepository;
+    @Autowired
+    private  MediaRepository mediaRepository;
+
     @Override
     public Posts createPosts(PostsDto postDto) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -48,6 +52,17 @@ public class PostsServiceImpl implements PostsService{
 
         post.setTotalLike(0);
         post.setTotalComment(0);
+
+
+        List<String> mediasIdStrings = postDto.getMediasId();
+        List<Medias> medias = new ArrayList<>();
+        for (String mediaId : mediasIdStrings) {
+            Medias media = mediaRepository.findById(mediaId).orElse(null);
+            if (media != null) {
+                medias.add(media);
+            }
+        }
+        post.setMedias(medias);
 
         post.setUserId(currentUser);
         post.setCreateAt(new Timestamp(System.currentTimeMillis()));
@@ -74,11 +89,20 @@ public class PostsServiceImpl implements PostsService{
             throw new AccessDeniedException("Bạn không có quyền cập nhật bài đăng này");
         }
 
-        // Cập nhật thông tin của bài đăng
         post.setTitle(updatedPost.getTitle());
         post.setBody(updatedPost.getBody());
         post.setStatus(updatedPost.getStatus());
-        // Cập nhật ngày chỉnh sửa
+
+        List<String> mediasIdStrings = updatedPost.getMediasId();
+        List<Medias> medias = new ArrayList<>();
+        for (String mediaId : mediasIdStrings) {
+            Medias media = mediaRepository.findById(mediaId).orElse(null);
+            if (media != null) {
+                medias.add(media);
+            }
+        }
+        post.setMedias(medias);
+
         post.setCreateAt(new Timestamp(System.currentTimeMillis()));
 
         postsRepository.save(post);

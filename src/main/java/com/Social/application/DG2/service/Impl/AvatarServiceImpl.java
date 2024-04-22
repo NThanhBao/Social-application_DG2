@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.*;
 import java.io.InputStream;
 import java.io.File;
@@ -23,14 +25,15 @@ public class AvatarServiceImpl implements AvatarService {
     String bucketName = "avatar";
     String bucketNameBackground = "background";
     @Override
-    public void uploadAvatar( String filePath) throws Exception {
+    public void uploadAvatar( MultipartFile filePath) throws Exception {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
         Users currentUser = usersRepository.findByUsername(currentUsername);
         String userId = currentUser.getId();
 
-        try (InputStream inputStream = new FileInputStream(filePath)) {
-            String objectName = userId + "/" + new File(filePath).getName();
+        try (InputStream inputStream = new BufferedInputStream(filePath.getInputStream())) {
+            String originalFileName = filePath.getOriginalFilename();
+            String objectName = userId + "/" + originalFileName;
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucketName)
@@ -39,20 +42,24 @@ public class AvatarServiceImpl implements AvatarService {
                             .contentType(getContentType(objectName))
                             .build()
             );
+            String avatarUrl = "http://localhost:9000/" + bucketName + "/" + objectName;
+            currentUser.setAvatar(avatarUrl);
+            usersRepository.save(currentUser);
         }catch (Exception e) {
             throw new Exception("Error uploading file to MinIO", e);
         }
     }
 
     @Override
-    public void uploadBackGround( String filePath) throws Exception {
+    public void uploadBackGround( MultipartFile filePath) throws Exception {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
         Users currentUser = usersRepository.findByUsername(currentUsername);
         String userId = currentUser.getId();
 
-        try (InputStream inputStream = new FileInputStream(filePath)) {
-            String objectName = userId + "/" + new File(filePath).getName();
+        try (InputStream inputStream = new BufferedInputStream(filePath.getInputStream())) {
+            String originalFileName = filePath.getOriginalFilename();
+            String objectName = userId + "/" + originalFileName;
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucketNameBackground)
@@ -61,6 +68,8 @@ public class AvatarServiceImpl implements AvatarService {
                             .contentType(getContentType(objectName))
                             .build()
             );
+            currentUser.setAvatar(null);
+            usersRepository.save(currentUser);
         }catch (Exception e) {
             throw new Exception("Error uploading file to MinIO", e);
         }

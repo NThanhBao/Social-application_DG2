@@ -1,12 +1,11 @@
 package com.Social.application.DG2.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -41,4 +40,8 @@ public class Posts {
 
     @Column(name = "created_at")
     private Timestamp createAt;
+
+    @OneToMany
+    @JoinColumn(name = "post_id")
+    private List<Medias> medias;
 }
