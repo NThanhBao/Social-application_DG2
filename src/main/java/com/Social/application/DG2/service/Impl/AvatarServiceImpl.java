@@ -1,18 +1,18 @@
 package com.Social.application.DG2.service.Impl;
 
+import com.Social.application.DG2.config.MinIOConfig;
 import com.Social.application.DG2.entity.Users;
 import com.Social.application.DG2.repositories.UsersRepository;
 import com.Social.application.DG2.service.AvatarService;
-import io.minio.PutObjectArgs;
-import io.minio.MinioClient;
-import io.minio.RemoveObjectArgs;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.Social.application.DG2.util.exception.NotFoundException;
+import io.minio.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import io.minio.errors.MinioException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,78 +22,78 @@ import java.security.NoSuchAlgorithmException;
 @Service
 public class AvatarServiceImpl implements AvatarService {
 
-    @Autowired
-    MinioClient minioClient;
-    @Autowired
-    UsersRepository usersRepository;
+    private final MinioClient minioClient;
+    private final UsersRepository usersRepository;
+    private final MinIOConfig minIOConfig;
+    String bucketName = "avatar";
 
-
-
-    @Override
-    public void uploadAvatar(String filePath) throws IOException {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = auth.getName();
-        Users currentUser = usersRepository.findByUsername(currentUsername);
-
-        String userId = currentUser.getId();
-
-        String bucketName = "avatar";
-        try (InputStream inputStream = new FileInputStream(filePath)) {
-            String objectName = userId + "/" + new File(filePath).getName();
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(objectName)
-                            .stream(inputStream, inputStream.available(), -1)
-                            .contentType(getContentType(objectName))
-                            .build()
-            );
-
-            String avatarUrl = "http://localhost:9000/" + bucketName + "/" + objectName;
-            currentUser.setAvatar(avatarUrl);
-            usersRepository.save(currentUser);
-        } catch (MinioException | IOException e) {
-            throw new IOException("Failed to upload file: " + e.getMessage());
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException(e);
-        }
+    public AvatarServiceImpl(MinioClient minioClient, UsersRepository usersRepository, MinIOConfig minIOConfig) {
+        this.minioClient = minioClient;
+        this.usersRepository = usersRepository;
+        this.minIOConfig = minIOConfig;
     }
 
-
-
     @Override
-    public void deleteAvatar(String objectName) throws IOException {
+    public void uploadAvatar(MultipartFile file) throws Exception {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
         Users currentUser = usersRepository.findByUsername(currentUsername);
 
         String userId = currentUser.getId();
 
-        String bucketName = "avatar";
-        try {
-            String objectFullName = userId + "/" + objectName;
+        try{
+            // Kiểm tra bucketName
+            checkBucketName(minioClient);
 
+            try (InputStream inputStream = new BufferedInputStream(file.getInputStream())) {
+                String objectName = userId + "/" + file.getOriginalFilename();
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(objectName)
+                                .stream(inputStream, inputStream.available(), -1)
+                                .contentType(getContentType(objectName))
+                                .build()
+
+                );
+                String avatarUrl = bucketName + "/" + objectName;
+                currentUser.setAvatar(avatarUrl);
+                usersRepository.save(currentUser);
+            }
+        } catch (Exception e) {
+            throw new Exception("Lỗi khi tải tệp lên MinIO", e);
+        }
+    }
+    @Override
+    public void deleteAvatar(String objectName) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = auth.getName();
+        Users currentUser = usersRepository.findByUsername(currentUsername);
+
+        String userId = currentUser.getId();
+
+        try {
+            String filepath = userId + "/" + objectName;
+            // Kiểm tra xem tệp tồn tại trên MinIO hay không
+            minioClient.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(filepath)
+                            .build()
+            );
             // Xóa tập tin từ MinIO
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
                             .bucket(bucketName)
-                            .object(objectFullName)
+                            .object(filepath)
                             .build()
             );
-
-            // Cập nhật cơ sở dữ liệu
-            // Đặt đường dẫn avatar của người dùng thành null
             currentUser.setAvatar(null);
-            // Lưu thay đổi vào cơ sở dữ liệu
             usersRepository.save(currentUser);
-        } catch (MinioException e) {
-            throw new IOException("Failed to delete file: " + e.getMessage());
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException(e);
+        } catch (MinioException | InvalidKeyException | IOException | NoSuchAlgorithmException e) {
+            throw new NotFoundException("Không tìm thấy tệp đính kèm từ MinIO: " + e.getMessage());
         }
     }
-
-
     private String getContentType(String fileName) {
         String fileExtension = getFileExtension(fileName).toLowerCase();
         return switch (fileExtension) {
@@ -101,12 +101,29 @@ public class AvatarServiceImpl implements AvatarService {
             case "png" -> "image/png";
             case "gif" -> "image/gif";
             case "bmp" -> "image/bmp";
-            default -> "application/octet-stream"; // Kiểu MIME mặc định
+            default -> "application/octet-stream";
         };
     }
-
     private String getFileExtension(String fileName) {
         int lastDotIndex = fileName.lastIndexOf('.');
         return (lastDotIndex == -1) ? "" : fileName.substring(lastDotIndex + 1);
+    }
+    public void checkBucketName(MinioClient minioClient) throws Exception {
+
+        BucketExistsArgs bucketExistsArgs = BucketExistsArgs.builder()
+                .bucket(bucketName)
+                .build();
+
+        if (minioClient.bucketExists(bucketExistsArgs)) {
+            System.out.println(bucketName + " exists.");
+        } else {
+            MakeBucketArgs makeBucketArgs = MakeBucketArgs.builder()
+                    .bucket(bucketName)
+                    .build();
+
+            minioClient.makeBucket(makeBucketArgs);
+
+            System.out.println(bucketName + " created.");
+        }
     }
 }

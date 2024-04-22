@@ -3,8 +3,10 @@ package com.Social.application.DG2.controller;
 import com.Social.application.DG2.service.AvatarService;
 import com.Social.application.DG2.util.annotation.CheckLogin;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -21,17 +23,17 @@ public class AvatarController {
     }
 
     @CheckLogin
-    @PostMapping("/upload/{objectName}")
-    public ResponseEntity<String> uploadAvt(@RequestParam("filePath") String filePath) {
+    @PostMapping(value = "/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            avatarService.uploadAvatar(filePath);
+            avatarService.uploadAvatar(file);
             return ResponseEntity.ok("File uploaded successfully!");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file: " + e.getMessage());
         }
     }
     @CheckLogin
-    @DeleteMapping("/delete/{objectName}")
+    @DeleteMapping("/delete")
     public ResponseEntity<String> deleteAvt(@RequestParam("objectName") String objectName) {
         try {
             avatarService.deleteAvatar(objectName);
