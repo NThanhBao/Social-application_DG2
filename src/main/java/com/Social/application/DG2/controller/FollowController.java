@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/follows")
 public class FollowController {
 
@@ -91,6 +92,7 @@ public class FollowController {
         return ResponseEntity.ok(followerUsers.getContent());
     }
 
+    @CheckLogin
     @DeleteMapping("/unfollow/{followingUserId}")
     public ResponseEntity<String> unfollowUser(@PathVariable String followingUserId) {
         followService.unfollowUser(followingUserId);

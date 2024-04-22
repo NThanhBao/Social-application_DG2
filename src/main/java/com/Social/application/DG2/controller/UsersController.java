@@ -6,6 +6,7 @@ import com.Social.application.DG2.service.Impl.UsersServiceImpl;
 import com.Social.application.DG2.service.SearchUsersService;
 import com.Social.application.DG2.util.annotation.CheckEnableType;
 import com.Social.application.DG2.util.annotation.CheckLogin;
+import com.Social.application.DG2.util.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,7 @@ import java.util.Map;
 
 @Controller
 @RestController
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/user")
 public class UsersController {
     @Autowired
@@ -66,7 +67,7 @@ public class UsersController {
 
                 return  ResponseEntity.ok(responseData);
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("sai username hoặc password.");
         }
     }
 
@@ -105,6 +106,18 @@ public class UsersController {
             return response;
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật người dùng: " + e.getMessage());
+        }
+    }
+    @CheckLogin
+    @GetMapping("/details")
+    public ResponseEntity<UsersDto> getUserDetails() {
+        try {
+            UsersDto userDetails = userService.getUserDetails();
+            return ResponseEntity.ok(userDetails);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

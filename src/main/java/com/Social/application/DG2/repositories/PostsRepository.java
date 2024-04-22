@@ -2,6 +2,8 @@ package com.Social.application.DG2.repositories;
 
 import com.Social.application.DG2.entity.Posts;
 import com.Social.application.DG2.entity.Users;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +15,7 @@ import java.util.UUID;
 
 @Repository
 public interface PostsRepository extends JpaRepository<Posts, String> {
-    List<Posts> findByUserId(Users user);
+    Page<Posts> findByUserId(Users user, Pageable pageable);
 
     @Transactional
     @Modifying

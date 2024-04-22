@@ -6,9 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface FollowService {
     void followUser(String followingUserId);
-
     int getFollowingCount();
-
     int getFollowerCount();
     void unfollowUser(String followingUserId);
 
