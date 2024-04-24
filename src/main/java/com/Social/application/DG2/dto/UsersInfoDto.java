@@ -18,6 +18,7 @@ public class UsersInfoDto {
     private String phoneNumber;
     private Timestamp dateOfBirth;
     private String mail;
+    private String address;
     private String avatar;
 
 }
