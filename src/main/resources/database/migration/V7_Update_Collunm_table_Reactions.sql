@@ -1,0 +1,2 @@
+AFTER TABLE reactions
+      MODIFY type VARCHAR(255) NOT NULL;
