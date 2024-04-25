@@ -1,18 +1,19 @@
 package com.Social.application.DG2.controller;
 
-import com.Social.application.DG2.config.JwtAuthenticationFilter;
 import com.Social.application.DG2.dto.SearchUserDto;
 import com.Social.application.DG2.dto.UsersDto;
 import com.Social.application.DG2.service.Impl.UsersServiceImpl;
 import com.Social.application.DG2.service.SearchUsersService;
+import com.Social.application.DG2.util.annotation.CheckEnableType;
 import com.Social.application.DG2.util.annotation.CheckLogin;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,9 +48,6 @@ public class UsersController {
     private ModelMapper modelMapper;
     @Autowired
     private UsersServiceImpl registerService;
-
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired
     private SearchUsersService searchUsersService;
     @PostMapping("/auth/login")
@@ -120,6 +118,19 @@ public class UsersController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi xóa người dùng: " + e.getMessage());
         }
+    }
+
+    @CheckLogin
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Users users = userService.getUserByUsername(username);
+        if (users == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        UsersInfoDto usersInfoDto = modelMapper.map(users, UsersInfoDto.class);
+        return ResponseEntity.ok(usersInfoDto);
     }
 
 }
