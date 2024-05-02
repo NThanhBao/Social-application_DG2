@@ -14,18 +14,5 @@ public class PostsDto {
     private String body;
     private String status;
 
-    private List<Medias> mediasId;
-
-    public List<String> getMediasId() {
-        List<String> mediasIds = new ArrayList<>();
-        if (mediasId != null && !mediasId.isEmpty()) {
-            for (Medias media : mediasId) {
-                mediasIds.add(media.getId());
-            }
-        }
-        return mediasIds;
-    }
-
-
-
+    private List<String> mediasId;
 }
