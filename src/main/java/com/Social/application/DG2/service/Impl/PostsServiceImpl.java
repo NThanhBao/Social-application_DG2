@@ -44,7 +44,6 @@ public class PostsServiceImpl implements PostsService{
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
         Users currentUser = usersRepository.findByUsername(currentUsername);
-        String UserId = usersRepository.findById(currentUsername).toString();
 
         if (currentUser == null) {
             throw new EntityNotFoundException("Current user not found");

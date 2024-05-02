@@ -122,8 +122,8 @@ public class PostsController {
     }
 
     @CheckLogin
-    @PostMapping(value = "/upload/Media", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<String> uploadPostVideo(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<String> uploadPostVideo(@RequestParam("filePath") MultipartFile file) {
         try {
             String mediaId = postService.uploadMedia(file);
             return ResponseEntity.ok("Media ID: " +mediaId);
@@ -134,7 +134,7 @@ public class PostsController {
     }
 
     @CheckLogin
-    @DeleteMapping("/delete/Media")
+    @DeleteMapping("/delete")
     public ResponseEntity<String> deletePostVideos(@RequestParam("filePath") String filePath) {
         try {
             postService.deletePost(filePath);

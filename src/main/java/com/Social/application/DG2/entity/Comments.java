@@ -14,7 +14,11 @@ public class Comments {
 
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
-    private UUID commentsId;
+    private String id;
+
+    public Comments() {
+        this.id = UUID.randomUUID().toString();
+    }
 
     private String content;
 
