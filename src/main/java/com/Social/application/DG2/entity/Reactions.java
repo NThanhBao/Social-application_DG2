@@ -1,13 +1,7 @@
 package com.Social.application.DG2.entity;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.Type;
-
-
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -15,18 +9,23 @@ import java.util.UUID;
 public class Reactions {
     @Id
     @Column(name = "id", columnDefinition = "CHAR(36)")
-
-    private UUID reactionsId;
+    private String reactionsId;
 
     @Column(name = "object_type")
     private String objectType;
 
     @Column(name = "object_id", columnDefinition = "CHAR(36)")
-    private UUID objectId;
+    private String objectId;
 
-    private int type;
+    private String type;
 
     @ManyToOne
     @JoinColumn(name = "created_by")
-    private Users usersId;
+    private Users createdBy;
+
+    // Phương thức setter cho createdBy
+    public void setCreatedBy(Users createdBy) {
+        this.createdBy = createdBy;
+    }
 }
+
